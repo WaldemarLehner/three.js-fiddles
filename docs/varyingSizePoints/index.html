@@ -7,6 +7,27 @@
 			body { margin: 0; overflow:hidden;}
 			canvas { width: 100%; height:100%;}
 		</style>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			uniform float amplitude;
+			attribute float size;
+			attribute vec3 customColor;
+			varying vec3 vColor;
+			void main() {
+				vColor = customColor;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_PointSize = size * ( 300.0 / -mvPosition.z );
+				gl_Position = projectionMatrix * mvPosition;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			uniform vec3 color;
+			uniform sampler2D texture;
+			varying vec3 vColor;
+			void main() {
+				gl_FragColor = vec4( color * vColor, 1.0 );
+				gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+			}
+		</script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.3/dat.gui.min.js" integrity="sha256-wNFZIhNeD4T3GrRJ/xuRI3Wt1f9oTh3OxBUqtG8v6Ek=" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/97/three.min.js" integrity="sha256-PtfJMWwHJIEzMPJyARHylYJ6wioE2kcfFnwPoGufKOU=" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.4.0/chroma.min.js" integrity="sha256-AHZjojRGiPiQ2qpXsyLWPcgq71zP70+pDd+TXO91kcw=" crossorigin="anonymous"></script>

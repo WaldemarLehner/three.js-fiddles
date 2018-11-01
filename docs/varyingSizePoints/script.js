@@ -6,7 +6,7 @@ let controls = new THREE.OrbitControls(camera);
 //Generate Point Texure from a canvas element
 let baseMaterial = generatePointTexture();
 renderer.setSize(window.innerWidth,window.innerHeight);
-scene.background = new THREE.Color( 0xffffff );
+scene.background = new THREE.Color( 0xEAEAEA );
 document.body.appendChild(renderer.domElement);
 camera.position.z = 5;
 
@@ -41,10 +41,9 @@ var SceneBuilder = function(){
 		//#endregion
 		//#region Populating Data Arrays
 		for(let xIterator = 0;xIterator < _this.xIterations;xIterator++){
-			//f(x) = sin((2PI/a)*(x-z)   x being xIterator / z being zIterator / a being this.xIterations
 			let xPosition = xIterator;
 			for(let zIterator = 0; zIterator < _this.zIterations; zIterator++){
-				let yPosition = Math.sin((2*Math.PI/_this.xIterations)*(xIterator-zIterator))*_this.xIterations/10;
+				let yPosition = 0;
 				let zPosition = zIterator;
 				let color = new THREE.Color(colorScale(xIterator).num());
 				let size = _this.minSize+(zIterator/_this.zIterations)*(_this.maxSize-_this.minSize);
@@ -57,15 +56,29 @@ var SceneBuilder = function(){
 		//#endregion
 		//#region Generate the Geometry
 		let geometry = new THREE.BufferGeometry();
-		geometry.addAttribute("position",new THREE.Float32BufferAttribute(vertices,3));
-		geometry.addAttribute("color",new THREE.Float32BufferAttribute(colors,3));
-		geometry.addAttribute("size",new THREE.Float32BufferAttribute(sizes),1);
-		console.log(geometry);
-		//geometry.verticesNeedUpdate = true;
+		geometry.addAttribute("position",new THREE.BufferAttribute(new Float32Array(vertices),3));
+		geometry.addAttribute("customColor",new THREE.BufferAttribute(new Float32Array(colors),3));
+		geometry.addAttribute("size",new THREE.BufferAttribute(new Float32Array(sizes),1));
 		geometry.computeBoundingSphere();
 		//#endregion
+		//#region Shader
+		let shadermaterial = new THREE.ShaderMaterial({
+			uniforms: {
+				amplitude: {value:1.0},
+				color: {value: new THREE.Color(0xFFFFFF)},
+				texture: {value: baseMaterial}
+			},
+			vertexShader: document.getElementById( 'vertexshader' ).textContent,
+			fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+			depthTest:false,
+			transparent:true
+		});
+		//#endregion
+		//#region Material
+
+		//#endregion
 		//#region Add to Scene
-		let points = new THREE.Points(geometry,new THREE.PointsMaterial({ size: 1, vertexColors: THREE.VertexColors, map:baseMaterial ,transparent:true,depthWrite:false}));
+		let points = new THREE.Points(geometry,shadermaterial);
 		points.name = "points";
 		scene.add(points);
 		//#endregion
